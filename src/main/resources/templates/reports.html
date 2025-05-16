@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Transaction History</title>
+  
+  <style>
+    /* Base */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      overflow: hidden; /* no page scroll */
+      color: #000;
+    }
+
+    /* Header */
+    header {
+      background-color: #4CAF50;
+      color: #000;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      font-size: 24px;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    header a {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    header a:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1800px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      height: calc(100vh - 100px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Table wrapper with equal padding top & bottom and scroll */
+    .table-wrapper {
+      flex-grow: 1;
+      overflow-y: auto;
+      max-height: 100%;
+      padding: 15px 5px; /* equal padding top and bottom */
+      box-sizing: border-box;
+    }
+
+    h2 {
+      margin: 0 0 15px 0;
+      color: #000;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      text-align: left;
+      word-wrap: break-word;
+      color: #000;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #fafafa;
+    }
+
+    /* Nested items sold table */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    .items-table th, .items-table td {
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+      white-space: nowrap;
+      color: #222;
+    }
+
+    .items-table th {
+      background-color: #e0f2e9;
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    /* Column widths */
+    thead th:nth-child(1), tbody td:nth-child(1) { width: 10%; }
+    thead th:nth-child(2), tbody td:nth-child(2) { width: 10%; }
+    thead th:nth-child(3), tbody td:nth-child(3) { width: 10%; }
+    thead th:nth-child(4), tbody td:nth-child(4) { width: 10%; text-align: right; }
+    thead th:nth-child(5), tbody td:nth-child(5) { width: 50%; }
+  </style>
+
+</head>
+<body>
+
+<header>
+  Transaction History
+  <a href="/user-dashboard">Back to Dashboard</a>
+</header>
+
+<div class="container">
+  <h2>All Transactions</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Cashier</th>
+          <th>Timestamp (Asia/Manila)</th>
+          <th>Total Price</th>
+          <th>Items Sold</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="transaction : ${transactions}">
+          <td th:text="${transaction.id}">1</td>
+          <td th:text="${transaction.username}">user1</td>
+          <td th:text="${transaction.timestamp != null ? #temporals.format(transaction.timestamp.atZone(T(java.time.ZoneId).of('Asia/Manila')), 'yyyy-MM-dd HH:mm') : 'N/A'}">2025-05-15 12:00</td>
+          <td th:text="${#numbers.formatDecimal(transaction.totalPrice, 1, 'COMMA', 2, 'POINT')}">$100.00</td>
+          <td>
+            <table class="items-table" th:if="${transaction.items != null}">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Quantity</th>
+                  <th>Price per Item</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="item : ${transaction.items}">
+                  <td th:text="${item.productName}">Product A</td>
+                  <td th:text="${item.quantity}">1</td>
+                  <td th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT')}">$10.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <span th:if="${transaction.items == null || #lists.isEmpty(transaction.items)}">No items</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

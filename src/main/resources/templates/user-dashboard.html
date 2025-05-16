@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+      background: #f8f9fa;
+      margin: 0;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      background-color: #4caf50; /* green header */
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .top-bar h1 {
+      font-size: 24px;
+      color: black; /* black text on green */
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .logout-btn {
+      padding: 10px 15px;
+      background-color: #f44336; /* red */
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background-color: #d32f2f; /* darker red */
+    }
+
+    .success-message,
+    .error-message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .button-group {
+      margin-bottom: 30px;
+    }
+
+    .button-group a {
+      margin-right: 12px;
+      padding: 10px 16px;
+      background: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .button-group a:hover {
+      background: #45a049;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .product-table {
+      flex: 1;
+      min-width: 400px;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .product-table h2 {
+      text-align: center;
+      margin-top: 0;
+      color: #333;
+    }
+
+    .scroll-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #4CAF50;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .quantity-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .quantity-buttons button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .quantity-buttons input {
+      width: 40px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      padding: 4px;
+    }
+
+    .cart-total {
+      text-align: right;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .cart-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .cart-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .cart-actions form:nth-child(1) button {
+      background: #2196F3;
+    }
+
+    .cart-actions form:nth-child(2) button {
+      background: #9E9E9E;
+    }
+
+    .cart-remove-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .cart-remove-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Welcome to JA-V POS System User: <span th:text="${username}">User</span></h1>
+  <form th:action="@{/logout}" method="post" onsubmit="return confirm('Are you sure you want to logout?');">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form>
+</div>
+
+<div th:if="${param.success}" class="success-message">Transaction completed successfully!</div>
+<div th:if="${error}" class="error-message"><span th:text="${error}">Item out of stock</span></div>
+
+<div class="button-group">
+  <a th:href="@{/products}">Go to Products</a>
+  <a th:href="@{/user-dashboard/reports}">Reports</a>
+</div>
+
+<div class="main-content">
+  <!-- Product List -->
+  <div class="product-table">
+    <h2>Product List</h2>
+    <div class="scroll-container">
+      <table>
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+          <td th:text="${product.name}">Name</td>
+          <td th:text="${product.description}">Description</td>
+          <td th:text="${product.price}">Price</td>
+          <td th:text="${product.quantity}">Qty</td>
+          <td>
+            <form th:action="@{/user-dashboard/add-to-cart}" method="post">
+              <input type="hidden" name="productId" th:value="${product.id}" />
+              <input type="hidden" name="quantity" value="1" />
+              <button type="submit" th:if="${product.quantity > 0}">Add</button>
+              <button type="button" th:if="${product.quantity == 0}" disabled style="background: #aaa;">Out of Stock</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <div class="product-table">
+    <h2>Cart</h2>
+    <div class="scroll-container">
+      <table th:if="${cart != null and !cart.isEmpty()}">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Qty</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${cart}">
+          <td th:text="${item.product.name}">Item Name</td>
+          <td>
+            <div class="quantity-buttons">
+              <form th:action="@{/user-dashboard/update-quantity}" method="post">
+                <input type="hidden" name="productId" th:value="${item.product.id}" />
+                <input type="hidden" name="quantity" th:value="${item.quantity - 1}" />
+                <button type="submit" th:disabled="${item.quantity <= 1}">−</button>
+              </form>
+              <input type="text" th:value="${item.quantity}" readonly />
+              <form th:action="@{/user-dashboard/update-quantity}" method="post">
+                <input type="hidden" name="productId" th:value="${item.product.id}" />
+                <input type="hidden" name="quantity" th:value="${item.quantity + 1}" />
+                <button type="submit" th:disabled="${item.quantity >= item.product.quantity}">+</button>
+              </form>
+            </div>
+          </td>
+          <td th:text="${item.totalPrice}">0.00</td>
+          <td>
+            <form th:action="@{/user-dashboard/remove-from-cart}" method="post">
+              <input type="hidden" name="productId" th:value="${item.product.id}" />
+              <button type="submit" class="cart-remove-btn">Remove</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p th:if="${cart == null or cart.isEmpty()}" style="text-align:center; color:#777;">Your cart is empty.</p>
+    </div>
+
+    <div class="cart-total" th:if="${cartTotal != null}">
+      Total: ₱<span th:text="${cartTotal}">0.00</span>
+    </div>
+
+    <div class="cart-actions" th:if="${cart != null and !cart.isEmpty()}">
+      <form th:action="@{/user-dashboard/checkout}" method="post">
+        <button type="submit">Checkout</button>
+      </form>
+      <form th:action="@{/user-dashboard/clear-cart}" method="post">
+        <button type="submit">Clear Cart</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
